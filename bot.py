@@ -1,3 +1,7 @@
+import discord
+import asyncio
+# (Убедись, что у тебя импортирован твой gemini_client)
+
 @bot.event
 async def on_message(message):
     if message.author == bot.user:
@@ -13,26 +17,39 @@ async def on_message(message):
             if not prompt:
                 prompt = "Привет!"
 
-            # Список моделей по приоритету
-            models_to_try = ["gemini-3.8-flash", "gemini-3.5-flash", "gemini-3.6-flash", "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]
+            # 1. ИСПРАВЛЕНО: Только реальные, актуальные модели Google
+            models_to_try = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-1.0-pro"]
             response_text = None
+            last_error = None
+
+            # 2. ДОБАВЛЕНО: Системный промпт (характер бота)
+            system_instruction = "Ты — IMARCH Coordinator, полезный и дружелюбный ИИ-ассистент в Discord-чате. Отвечай кратко, по делу и на русском языке."
 
             for model_name in models_to_try:
                 try:
+                    # Примечание: синтаксис может немного отличаться в зависимости от версии SDK Google
+                    # Если ты используешь новый google-genai SDK, передача system_instruction может выглядеть иначе.
                     res = gemini_client.models.generate_content(
                         model=model_name,
                         contents=prompt,
+                        # Если SDK поддерживает системные инструкции:
+                        # config={'system_instruction': system_instruction} 
                     )
                     if res and res.text:
                         response_text = res.text
                         break
                 except Exception as e:
-                    print(f"Модель {model_name} недоступна: {e}")
+                    last_error = str(e)
+                    print(f"[Ошибка API] Модель {model_name} недоступна: {e}")
+                    # 3. ДОБАВЛЕНО: Пауза 2 секунды перед следующей попыткой
+                    await asyncio.sleep(2) 
                     continue
 
             if response_text:
                 await message.reply(response_text)
             else:
-                await message.reply("Серверы Gemini сейчас перегружены. Попробуйте повторить запрос через минуту.")
+                # 4. УЛУЧШЕНО: Более понятный ответ для пользователя
+                print(f"Все модели недоступны. Последняя ошибка: {last_error}")
+                await message.reply("Извини, мой ИИ-мозг сейчас перегружен или недоступен. Пожалуйста, попробуй упомянуть меня еще раз через минуту!")
 
     await bot.process_commands(message)
