@@ -15,8 +15,8 @@ async def on_message(message):
                     prompt = "Привет!"
 
                 response = gemini_client.models.generate_content(
-                    model="gemini-1.5/2.0-flash",
-                    contents=prompt,
+    model="gemini-3.8-flash",
+    contents=prompt,
                 )
                 await message.reply(response.text if response.text else "Получен пустой ответ.")
             except Exception as e:
