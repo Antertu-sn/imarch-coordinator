@@ -14,7 +14,7 @@ async def on_message(message):
                 prompt = "Привет!"
 
             # Список моделей по приоритету
-            models_to_try = ["gemini-3.8-flash", "gemini-2.0-flash", "gemini-1.5-flash"]
+            models_to_try = ["gemini-3.8-flash", "gemini-3.5-flash", "gemini-3.6-flash", "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]
             response_text = None
 
             for model_name in models_to_try:
